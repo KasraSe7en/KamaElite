@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KAMA ELITE • Alvir Shadow Citadel</title>
+  <meta name="color-scheme" content="dark">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg:        #03030a;
+      --surface:    #0f0825;
+      --card:       rgba(20, 12, 50, 0.78);
+      --accent:     #c084fc;
+      --accent-dark:#7c3aed;
+      --accent-glow:rgba(192, 132, 252, 0.65);
+      --text:       #f0e0ff;
+      --text-dim:   #c4a1ff;
+      --border:     rgba(192,132,252,0.28);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 5.5rem;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Matrix background ─ lighter & more performant */
+    .matrix {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      opacity: 0.13;
+      pointer-events: none;
+      contain: strict;
+    }
+
+    .gradient-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 20% 10%, rgba(192,132,252,0.11) 0%, transparent 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    header {
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline: 0;
+      z-index: 1000;
+      padding: 1.1rem 5vw;
+      background: rgba(6, 4, 18, 0.92);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border-block-end: 1px solid var(--border);
+      transition: all 0.4s ease;
+    }
+
+    header.scrolled {
+      padding-block: 0.9rem;
+      background: rgba(6, 4, 18, 0.97);
+      box-shadow: 0 10px 60px rgba(0,0,0,0.65);
+    }
+
+    .logo {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2.1rem, 6vw, 3.2rem);
+      font-weight: 900;
+      letter-spacing: 0.45em;
+      color: var(--accent);
+      text-shadow: 0 0 30px var(--accent-glow);
+      animation: subtle-flicker 10s infinite alternate;
+    }
+
+    nav a {
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-inline-start: clamp(1.4rem, 4vw, 2.8rem);
+      font-size: clamp(1.05rem, 2.5vw, 1.2rem);
+      font-weight: 500;
+      position: relative;
+      transition: color 0.4s ease;
+    }
+
+    nav a:hover,
+    nav a:focus-visible {
+      color: white;
+      outline: none;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      inset-inline: 0;
+      block-size: 2.5px;
+      inset-block-end: -0.6rem;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      scale: 0 1;
+      transition: scale 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    nav a:hover::after,
+    nav a:focus-visible::after {
+      scale: 1 1;
+    }
+
+    /* Hero */
+    .hero {
+      min-block-size: 100dvh;
+      min-block-size: 100svh;
+      display: grid;
+      place-content: center;
+      text-align: center;
+      padding-inline: 5vw;
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(4.8rem, 14vw, 13rem);
+      font-weight: 900;
+      letter-spacing: clamp(6px, 1.8vw, 14px);
+      background: linear-gradient(90deg, #d8b4fe, #c084fc, #a855f7, #7c3aed, #c084fc);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 60px rgba(168,85,247,0.7);
+      animation: gradient-flow 14s ease infinite, glitch-hero 7s infinite;
+    }
+
+    .tag {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      max-inline-size: 60ch;
+      margin: 2rem auto 4rem;
+      color: var(--text-dim);
+      opacity: 0;
+      transform: translateY(3rem);
+      animation: fadeUp 1.5s 0.7s forwards cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.8rem;
+      justify-content: center;
+    }
+
+    .btn {
+      inline-size: fit-content;
+      padding: 1rem 2.8rem;
+      border-radius: 3rem;
+      font-size: clamp(1.15rem, 2.5vw, 1.4rem);
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.4);
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #a855f7, #c084fc);
+      color: white;
+      box-shadow: 0 10px 40px rgba(168,85,247,0.55);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus-visible {
+      transform: translateY(-0.8rem) scale(1.06);
+      box-shadow: 0 20px 80px rgba(192,132,252,0.8);
+    }
+
+    .btn-outline {
+      border: 2.5px solid var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-outline:hover,
+    .btn-outline:focus-visible {
+      background: var(--accent);
+      color: var(--bg);
+      transform: translateY(-0.8rem);
+    }
+
+    main > section {
+      padding-block: clamp(8rem, 14vh, 14rem);
+      padding-inline: 5vw;
+      max-inline-size: 1700px;
+      margin-inline: auto;
+    }
+
+    h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(3.2rem, 8vw, 5.5rem);
+      text-align: center;
+      margin-block-end: 5rem;
+      background: linear-gradient(90deg, transparent 20%, var(--accent) 50%, transparent 80%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 50px var(--accent-glow);
+      opacity: 0;
+      transform: translateY(4rem);
+      transition: all 1.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    section.visible h2 {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .grid {
+      display: grid;
+      gap: clamp(1.8rem, 4vw, 3rem);
+    }
+
+    @media (min-width: 760px)  { .grid-3 { grid-template-columns: repeat(3,1fr); } }
+    @media (min-width: 1000px) { .grid-4 { grid-template-columns: repeat(4,1fr); } }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1.3rem;
+      padding: 2.4rem 2rem;
+      backdrop-filter: blur(12px);
+      transition: all 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+      opacity: 0;
+      transform: translateY(5rem) scale(0.96);
+    }
+
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .card:hover,
+    .card:focus-within {
+      transform: translateY(-1.2rem) scale(1.025);
+      border-color: var(--accent);
+      box-shadow: 0 25px 90px rgba(192,132,252,0.32);
+    }
+
+    .card h3 {
+      font-family: 'VT323', monospace;
+      font-size: clamp(1.9rem, 4.5vw, 2.6rem);
+      color: var(--accent);
+      margin-block-end: 1.2rem;
+      letter-spacing: 1px;
+    }
+
+    /* Terminal */
+    .terminal {
+      margin: 6rem auto;
+      max-inline-size: 1150px;
+      background: #0a0818;
+      border: 1px solid #4c1d95;
+      border-radius: 1.1rem;
+      overflow: hidden;
+      box-shadow: 0 0 90px rgba(124,58,237,0.3);
+      opacity: 0;
+      transform: translateY(4rem);
+      transition: all 1.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    .terminal.visible { opacity: 1; transform: translateY(0); }
+
+    .term-header {
+      background: linear-gradient(90deg, #2a1242, #5b21b6);
+      padding: 0.9rem 1.3rem;
+      display: flex;
+      gap: 0.7rem;
+    }
+
+    .dot {
+      inline-size: 13px;
+      block-size: 13px;
+      border-radius: 50%;
+    }
+
+    .red    { background:#ff5f56; }
+    .yellow { background:#ffbd2e; }
+    .green  { background:#28c940; }
+
+    .term-body {
+      padding: 1.8rem 2.2rem;
+      font-family: 'VT323', monospace;
+      font-size: clamp(1.35rem, 3vw, 1.65rem);
+      color: #d8b4fe;
+      line-height: 1.55;
+    }
+
+    .prompt { color: var(--accent); font-weight: bold; }
+
+    /* Form */
+    .form-container {
+      max-inline-size: 900px;
+      margin-inline: auto;
+    }
+
+    input, textarea {
+      inline-size: 100%;
+      padding: 1.3rem;
+      margin-block: 1.1rem;
+      background: rgba(25,18,60,0.8);
+      border: 1px solid #6b4ca8;
+      border-radius: 0.9rem;
+      color: var(--text);
+      font-size: 1.25rem;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(192,132,252,0.2);
+    }
+
+    textarea { resize: vertical; min-block-size: 140px; }
+
+    button.btn[type="submit"] {
+      inline-size: 100%;
+      padding-block: 1.4rem;
+      font-size: 1.55rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 5rem 5vw 7rem;
+      color: var(--text-dim);
+      border-block-start: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    /* Animations */
+    @keyframes gradient-flow {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes glitch-hero {
+      0%, 100% { transform: translate(0); }
+      2%, 5%   { transform: translate(-4px, 4px) skew(3deg); }
+      7%, 9%   { transform: translate(4px, -4px) skew(-3deg); }
+    }
+
+    @keyframes subtle-flicker {
+      0%, 100% { opacity: 1; }
+      49.9%    { opacity: 0.99; }
+      50%      { opacity: 1; }
+      50.1%    { opacity: 0.98; }
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Focus visible for accessibility */
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="matrix"><canvas id="matrix"></canvas></div>
+<div class="gradient-overlay"></div>
+
+<header id="header">
+  <div class="logo" aria-label="KAMA ELITE">KAMA</div>
+  <nav aria-label="Main navigation">
+    <a href="#home">Home</a>
+    <a href="#origin">Origin</a>
+    <a href="#arsenal">Arsenal</a>
+    <a href="#ops">Operations</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero" id="home">
+    <h1>KAMA ELITE</h1>
+    <p class="tag">ALVIR CITADEL — ARCHITECTS OF THE UNSEEN DIGITAL VOID</p>
+    <div class="btn-group">
+      <a href="#arsenal" class="btn btn-primary">Enter Arsenal</a>
+      <a href="#contact" class="btn btn-outline">Secure Channel</a>
+    </div>
+  </section>
+
+  <section id="origin">
+    <h2>ORIGIN NODE</h2>
+    <div class="grid grid-3">
+      <div class="card"><h3>Alvir Black-Site</h3><p>Geographically isolated fortress. Full EM shielding. Physical & logical air-gap layers. Zero public footprint.</p></div>
+      <div class="card"><h3>Operator Doctrine</h3><p>Need-to-know only. Ephemeral tooling. Deniability by design. No persistence. Absolute opsec.</p></div>
+      <div class="card"><h3>Adversary Scope</h3><p>Nation-states • Corporate black-ops • Tier-1 APTs. We mirror their TTPs — then obsolete them.</p></div>
+    </div>
+  </section>
+
+  <section id="arsenal">
+    <h2>OPERATIONAL ARSENAL</h2>
+    <div class="grid grid-4">
+      <div class="card"><h3>ShadowC2 v4.1</h3><p>HTTP/3 + DoH malleable C2. Memory-resident. Full EDR / AMSI / ETW bypass suite.</p></div>
+      <div class="card"><h3>VeilForge 2</h3><p>Polymorphic multi-stage loader. Kernel/userland evasion. Dynamic API unhooking.</p></div>
+      <div class="card"><h3>Nexus Recon</h3><p>Passive + active fusion. Breach-data correlation. Subdomain takeover. Leak surface monitoring.</p></div>
+      <div class="card"><h3>Eidolon Exploit Kit</h3><p>Browser → kernel → hypervisor chain generator. Fuzz → Exploit → Payload delivery pipeline.</p></div>
+    </div>
+
+    <div class="terminal">
+      <div class="term-header">
+        <div class="dot red"></div>
+        <div class="dot yellow"></div>
+        <div class="dot green"></div>
+      </div>
+      <div class="term-body">
+        <div><span class="prompt">kama@alvir</span>:~# whoami</div>
+        <div>root@shadow.kama</div><br>
+        <div><span class="prompt">kama@alvir</span>:~# status --ghost</div>
+        <div>[•] Uptime       : 1729 days</div>
+        <div>[•] Ghost nodes  : 124</div>
+        <div>[•] Threat level : CRITICAL</div>
+        <div>[•] Last exfil    : 00:09:14 ago</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ops">
+    <h2>CAPABILITIES MATRIX</h2>
+    <div class="grid grid-3">
+      <div class="card"><h3>Red Cell Domination</h3><p>Adversary emulation. Living-off-the-land. Supply-chain + physical breach simulation.</p></div>
+      <div class="card"><h3>Forensic Deep-Dive</h3><p>Memory forensics. Timeline reconstruction. Rootkit / anti-forensic recovery. Attribution-grade intel.</p></div>
+      <div class="card"><h3>Architecture Annihilation</h3><p>Zero-trust rebuild. Purple-team hardening. Crypto protocol audit. Ransomware kill-chain disruption.</p></div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <h2>INITIATE SECURE CHANNEL</h2>
+    <form class="form-container" id="contact-form" novalidate>
+      <input type="text" name="alias" placeholder="Alias / Handle" required aria-required="true">
+      <input type="text" name="pgp" placeholder="Encrypted Drop (PGP Key ID or Proton/Tutanota)" required aria-required="true">
+      <textarea name="context" placeholder="Operational Context / Request" rows="7" required aria-required="true"></textarea>
+      <button type="submit" class="btn btn-primary">Transmit</button>
+    </form>
+  </section>
+</main>
+
+<footer>
+  <p>© 2026 KAMA ELITE — ALVIR CITADEL • NO TRACE • DIGITAL ABYSS</p>
+</footer>
+
+<script>
+// Matrix rain ─ optimized
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d', { alpha: true });
+let width, height;
+
+function resize() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+}
+
+resize();
+window.addEventListener('resize', resize);
+
+const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789█▓▒░→←↑↓■□◆◇○◎●※☆★♪♫';
+const fontSize = 16;
+const columns = Math.floor(width / fontSize) + 1;
+const drops = new Uint16Array(columns).fill(1);
+
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(3,3,10,0.06)';
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = 'rgba(192,132,252,0.45)';
+  ctx.font = `${fontSize}px monospace`;
+
+  for (let i = 0; i < columns; i++) {
+    const text = chars[Math.floor(Math.random() * chars.length)];
+    const y = drops[i] * fontSize;
+    ctx.fillText(text, i * fontSize, y);
+    if (y > height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  }
+}
+
+let rafId;
+function loop() {
+  drawMatrix();
+  rafId = requestAnimationFrame(loop);
+}
+loop();
+
+// Header scroll effect
+window.addEventListener('scroll', () => {
+  document.getElementById('header').classList.toggle('scrolled', scrollY > 80);
+}, { passive: true });
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      // observer.unobserve(entry.target); // optional: one-time
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' });
+
+document.querySelectorAll('h2, .card, .terminal').forEach(el => observer.observe(el));
+
+// Fake form submit feedback
+document.getElementById('contact-form')?.addEventListener('submit', e => {
+  e.preventDefault();
+  const btn = e.target.querySelector('button');
+  btn.textContent = 'Transmitting...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = 'Signal Received';
+    setTimeout(() => {
+      btn.textContent = 'Transmit';
+      btn.disabled = false;
+      e.target.reset();
+    }, 2200);
+  }, 1800);
+});
+
+// Cleanup
+window.addEventListener('beforeunload', () => cancelAnimationFrame(rafId));
+</script>
+</body>
+</html>
